@@ -7,10 +7,11 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js",
-    "dev": "nodemon index.js"
-  },
+  "client": "cd client && npm run dev",
+  "server": "cd server && npm run dev",
+  "start": "cd server && node index.js",
+  "build": "cd client && npm run build"
+},
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
