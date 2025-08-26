@@ -1,4 +1,3 @@
-import React from 'react'
 import { Modal, Image } from 'antd';
 import { useState } from 'react';
 
