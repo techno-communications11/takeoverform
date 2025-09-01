@@ -7,10 +7,10 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-  "client": "cd client && npm run dev",
-  "server": "cd server && npm run dev",
-  "start": "cd server && node index.js",
-  "build": "cd client && npm run build"
+  "client": "npm run dev",
+  "server": "npm run dev",
+  "start": "nodemon index.js",
+  "build": "npm run build"
 },
   "dependencies": {
     "cors": "^2.8.5",
