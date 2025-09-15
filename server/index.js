@@ -7,18 +7,23 @@ import routing from "./src/routing/takeover.routing.js";
 
 let connectionRetries = 0;
 
+// Safe function to sanitize route strings
+const sanitizeRoute = (route) => {
+  if (!route) return "/";
+  // Remove protocol and domain if accidentally included
+  return route.replace(/^https?:\/\/[^/]+/, "") || "/";
+};
+
+// DB connection with retry logic
 const connectionDB = async () => {
   try {
-    console.log("Establishing DB connection....");
-    await mongoose.connect(serverConfig.dbUrl, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    console.log("Establishing DB connection...");
+    await mongoose.connect(serverConfig.dbUrl); // no deprecated options
     console.log("DB connected");
   } catch (error) {
     if (connectionRetries < DB_RETRY_LIMIT) {
       connectionRetries++;
-      console.log(`Reconnecting to DB ${connectionRetries}/${DB_RETRY_LIMIT}`);
+      console.log(`Reconnecting to DB ${connectionRetries}/${DB_RETRY_LIMIT}...`);
       await new Promise((resolve) => setTimeout(resolve, DB_RETRY_TIMEOUT));
       await connectionDB();
     } else {
@@ -41,23 +46,26 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// Initialize DB connection
+// Initialize DB
 connectionDB();
 
-// Mount routes
-app.use("/takeover", routing);
+// Mount takeover routes safely
+const takeoverRoute = sanitizeRoute(process.env.SOME_ROUTE || "/takeover");
+app.use(takeoverRoute, routing);
 
 // Log environment variables
 console.log("DB URL:", process.env.SERVER_APP_DB_URI);
-console.log("Other route env vars:", process.env.SOME_ROUTE);
+console.log("Route path used for takeover:", takeoverRoute);
 
-// Safe route logging for debugging
+// Safe logging of all registered routes
 if (app._router) {
   console.log("Registered routes:");
   app._router.stack
     .filter((layer) => layer.route)
     .forEach((layer) => {
-      console.log(`${Object.keys(layer.route.methods).join(", ").toUpperCase()} ${layer.route.path}`);
+      console.log(
+        `${Object.keys(layer.route.methods).join(", ").toUpperCase()} ${layer.route.path}`
+      );
     });
 }
 
