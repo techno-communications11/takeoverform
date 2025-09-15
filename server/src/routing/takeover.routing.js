@@ -3,7 +3,8 @@ import { addtakeoverentryController, getAlltakeoverentryController } from '../co
 
 const takeoverRouting = express.Router();
 
-takeoverRouting.post('/addtakeoverentry', addtakeoverentryController)
-takeoverRouting.get('/getAlltakeoverentry', getAlltakeoverentryController)
+// Routes
+takeoverRouting.post('/addtakeoverentry', addtakeoverentryController);
+takeoverRouting.get('/getAlltakeoverentry', getAlltakeoverentryController);
 
 export default takeoverRouting;
