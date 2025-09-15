@@ -48,7 +48,7 @@ app.use(cors(corsOptions)); // Handles CORS, including preflight (OPTIONS) reque
 app.use("/takeover", routing);
 
 // Start server
-const PORT = 4500;
+const PORT = 4570;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
