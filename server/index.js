@@ -1,51 +1,65 @@
 import express from "express";
 import cors from "cors";
+import mongoose from "mongoose";
 import { serverConfig } from "./src/config/serverconfig.js";
 import { DB_RETRY_LIMIT, DB_RETRY_TIMEOUT } from "./src/constant/constant.js";
-import mongoose from "mongoose";
 import routing from "./src/routing/takeover.routing.js";
 
-let connectionRetries = 0; // Fixed typo: connnectionRetries -> connectionRetries
+let connectionRetries = 0;
 
 const connectionDB = async () => {
   try {
     console.log("Establishing DB connection....");
-    await mongoose.connect(serverConfig.dbUrl);
-    console.log("Db connected");
+    await mongoose.connect(serverConfig.dbUrl, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log("DB connected");
   } catch (error) {
-    if (connectionRetries < DB_RETRY_LIMIT) { // Fixed typo here too
+    if (connectionRetries < DB_RETRY_LIMIT) {
       connectionRetries++;
       console.log(`Reconnecting to DB ${connectionRetries}/${DB_RETRY_LIMIT}`);
       await new Promise((resolve) => setTimeout(resolve, DB_RETRY_TIMEOUT));
       await connectionDB();
     } else {
       console.error("DB connection failed after retries:", error);
-      process.exit(1); // Exit with failure code
+      process.exit(1);
     }
   }
 };
 
 const app = express();
 
-// Initialize DB connection (no need for .then/.catch since errors are handled in connectionDB)
-connectionDB();
-
+// Middleware
 app.use(express.json());
 
-/**
- * CORS configuration for all routes
- */
 const corsOptions = {
-  origin: "https://takeoverform.techno-communications.com", // Restrict to frontend
+  origin: "https://takeoverform.techno-communications.com",
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
 };
+app.use(cors(corsOptions));
 
-app.use(cors(corsOptions)); // Handles CORS, including preflight (OPTIONS) requests
+// Initialize DB connection
+connectionDB();
 
-// Mount takeover routes
+// Mount routes
 app.use("/takeover", routing);
+
+// Log environment variables
+console.log("DB URL:", process.env.SERVER_APP_DB_URI);
+console.log("Other route env vars:", process.env.SOME_ROUTE);
+
+// Safe route logging for debugging
+if (app._router) {
+  console.log("Registered routes:");
+  app._router.stack
+    .filter((layer) => layer.route)
+    .forEach((layer) => {
+      console.log(`${Object.keys(layer.route.methods).join(", ").toUpperCase()} ${layer.route.path}`);
+    });
+}
 
 // Start server
 const PORT = 4570;

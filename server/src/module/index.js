@@ -1,9 +1,9 @@
-import mongoose from "mongoose";
-import takeoverModule from "./takeover.modle.js";
+    import mongoose from "mongoose";
+    import takeoverModule from "./takeover.modle.js";
 
-const db={};
+    const db={};
 
-db.mongoose=mongoose;
-db.takeover=takeoverModule
+    db.mongoose=mongoose;
+    db.takeover=takeoverModule
 
-export default db;
+    export default db;
